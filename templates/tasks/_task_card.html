@@ -1,0 +1,138 @@
+<!-- BoraJunto Task Card — redesenhado -->
+<div class="bj-task-card priority-{{ task.priority }} mb-2">
+
+    <!-- Topo: título + prioridade -->
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="bj-task-title">{{ task.title }}</div>
+        {% if task.priority == 'high' %}
+        <span class="bj-task-badge bj-badge-high">Alta</span>
+        {% elif task.priority == 'medium' %}
+        <span class="bj-task-badge bj-badge-medium">Média</span>
+        {% else %}
+        <span class="bj-task-badge bj-badge-low">Baixa</span>
+        {% endif %}
+    </div>
+
+    <!-- Descrição -->
+    {% if task.description %}
+    <div class="bj-task-meta mb-2" style="font-size:0.8rem; line-height:1.4;">
+        {{ task.description[:72] }}{% if task.description|length > 72 %}…{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Meta: responsável + prazo -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="bj-task-meta">
+            {% if task.assignee %}
+            <i class="bi bi-person-fill me-1" style="color:var(--bj-coral);"></i>{{ task.assignee.name.split()[0] }}
+            {% else %}
+            <span style="color:#f59e0b;"><i class="bi bi-person-dash me-1"></i>S/ responsável</span>
+            {% endif %}
+        </div>
+        {% if task.due_date %}
+        <div class="bj-task-meta">
+            <i class="bi bi-calendar3 me-1"></i>{{ task.due_date.strftime('%d/%m') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Anexos -->
+    {% if task.attachments %}
+    <div class="bj-task-attachments mb-2">
+        {% for att in task.attachments %}
+        <a href="{{ url_for('files.download_attachment', attachment_id=att.id) }}"
+           class="bj-task-att-link" title="{{ att.original_name }}">
+            <i class="bi bi-paperclip"></i> {{ att.original_name[:20] }}{% if att.original_name|length > 20 %}…{% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <hr class="bj-task-divider">
+
+    <!-- Ações -->
+    <div class="d-flex align-items-center gap-1">
+        <!-- Mudar status -->
+        <form method="POST"
+              action="{{ url_for('tasks.update_task_status', trip_id=trip.id, task_id=task.id) }}"
+              class="flex-grow-1">
+            {{ status_form.hidden_tag() }}
+            <select name="status" class="bj-task-select" onchange="this.form.submit()" title="Alterar status">
+                <option value="pending"  {% if task.status == 'pending'  %}selected{% endif %}>⏳ Pendente</option>
+                <option value="doing"    {% if task.status == 'doing'    %}selected{% endif %}>🔄 Fazendo</option>
+                <option value="done"     {% if task.status == 'done'     %}selected{% endif %}>✅ Concluída</option>
+            </select>
+        </form>
+
+        <!-- Anexar -->
+        <a href="{{ url_for('tasks.upload_task_attachment', trip_id=trip.id, task_id=task.id) }}"
+           class="bj-task-icon-btn" title="Anexar comprovante">
+            <i class="bi bi-paperclip"></i>
+        </a>
+
+        <!-- Editar -->
+        <a href="{{ url_for('tasks.edit_task', trip_id=trip.id, task_id=task.id) }}"
+           class="bj-task-icon-btn" title="Editar tarefa">
+            <i class="bi bi-pencil"></i>
+        </a>
+
+        <!-- Excluir (só autor ou gestor) -->
+        {% if can_manage or task.created_by_id == current_user.id %}
+        <form method="POST"
+              action="{{ url_for('tasks.delete_task', trip_id=trip.id, task_id=task.id) }}"
+              onsubmit="return confirm('Excluir esta tarefa definitivamente?');" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="bj-task-icon-btn bj-task-icon-danger" title="Excluir tarefa">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.bj-task-badge {
+    font-size: 0.68rem; font-weight: 700; border-radius: 50px;
+    padding: 2px 8px; flex-shrink: 0;
+}
+.bj-badge-high   { background:#fff0ee; color:var(--bj-coral); }
+.bj-badge-medium { background:#fff8e1; color:#856404; }
+.bj-badge-low    { background:#e8f5e9; color:#2e7d32; }
+
+.bj-task-attachments { display: flex; flex-wrap: wrap; gap: 4px; }
+.bj-task-att-link {
+    font-size: 0.73rem; color: var(--bj-coral);
+    background: var(--bj-coral-soft);
+    padding: 2px 8px; border-radius: 50px;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 3px;
+    transition: var(--bj-transition);
+}
+.bj-task-att-link:hover { background: var(--bj-coral); color:#fff; }
+
+.bj-task-divider {
+    border-color: var(--bj-border); margin: 0.6rem 0;
+}
+
+.bj-task-select {
+    width: 100%; background: var(--bj-bg);
+    border: 1.5px solid var(--bj-border);
+    border-radius: 50px; padding: 0.3rem 0.75rem;
+    font-size: 0.82rem; font-weight: 600; color: var(--bj-dark);
+    cursor: pointer; transition: var(--bj-transition);
+    appearance: none;
+}
+.bj-task-select:focus {
+    outline: none; border-color: var(--bj-coral);
+    box-shadow: 0 0 0 3px rgba(255,90,79,.12);
+}
+
+.bj-task-icon-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bj-bg); border: 1.5px solid var(--bj-border);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--bj-muted); font-size: 0.85rem; flex-shrink: 0;
+    transition: var(--bj-transition); text-decoration: none; cursor: pointer;
+}
+.bj-task-icon-btn:hover { background: var(--bj-coral-soft); color: var(--bj-coral); border-color: var(--bj-coral); }
+.bj-task-icon-danger:hover { background:#fff0ee; color:#e94b40; border-color:#fecaca; }
+</style>

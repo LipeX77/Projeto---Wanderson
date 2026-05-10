@@ -1,0 +1,327 @@
+{% extends "main/base.html" %}
+{% block title %}{{ trip.title }} — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <a href="{{ url_for('trips.list_trips') }}" class="bj-back-link bj-fade-in">
+        <i class="bi bi-arrow-left"></i> Minhas Viagens
+    </a>
+
+    <!-- ====== HERO DA VIAGEM ====== -->
+    <div class="bj-trip-hero bj-fade-in mt-3">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="bj-pill mb-3" style="background:rgba(255,255,255,.2); color:#fff;">
+                    <i class="bi bi-geo-alt-fill"></i> {{ trip.destination }}
+                </div>
+                <h1 class="bj-trip-title">{{ trip.title }}</h1>
+                <p class="bj-trip-meta">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    {{ trip.start_date.strftime('%d/%m/%Y') }} até {{ trip.end_date.strftime('%d/%m/%Y') }}
+                    &nbsp;·&nbsp;
+                    <i class="bi bi-people-fill me-1"></i>{{ trip.members|length }} membro(s)
+                </p>
+                {% if trip.description %}
+                <p class="mt-3" style="color:rgba(255,255,255,.85); font-size:0.93rem; max-width:500px;">
+                    {{ trip.description }}
+                </p>
+                {% endif %}
+            </div>
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    {% if can_manage %}
+                    <a href="{{ url_for('trips.invite_trip', trip_id=trip.id) }}"
+                       class="bj-btn-hero-action">
+                        <i class="bi bi-link-45deg"></i> Convidar
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('tasks.create_task', trip_id=trip.id) }}"
+                       class="bj-btn-hero-action">
+                        <i class="bi bi-plus-lg"></i> Nova Tarefa
+                    </a>
+                    <a href="{{ url_for('gallery.upload_photo', trip_id=trip.id) }}"
+                       class="bj-btn-hero-action">
+                        <i class="bi bi-camera"></i> Foto
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== STAT CARDS ====== -->
+    <div class="row g-3 mb-4 bj-fade-in">
+        <div class="col-6 col-md-3">
+            <div class="bj-stat-card">
+                <div class="bj-stat-number">{{ trip.members|length }}</div>
+                <div class="bj-stat-label"><i class="bi bi-people me-1"></i>Membros</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bj-stat-card">
+                <div class="bj-stat-number">{{ pending_tasks|length + doing_tasks|length }}</div>
+                <div class="bj-stat-label"><i class="bi bi-clock me-1"></i>Pendentes</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bj-stat-card">
+                <div class="bj-stat-number">{{ done_tasks|length }}</div>
+                <div class="bj-stat-label"><i class="bi bi-check-circle me-1"></i>Concluídas</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bj-stat-card">
+                <div class="bj-stat-number">{{ latest_photos|length }}</div>
+                <div class="bj-stat-label"><i class="bi bi-images me-1"></i>Memórias</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== PREVIEW MEMÓRIAS ====== -->
+    <div class="bj-section-header">
+        <div>
+            <div class="bj-section-title">📸 Memórias Recentes</div>
+            <div class="bj-section-sub">As últimas fotos da viagem</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('gallery.upload_photo', trip_id=trip.id) }}" class="bj-btn-ghost">
+                <i class="bi bi-plus-lg"></i> Foto
+            </a>
+            <a href="{{ url_for('gallery.list_photos', trip_id=trip.id) }}" class="bj-btn-outline">
+                Ver todas
+            </a>
+        </div>
+    </div>
+
+    {% if latest_photos %}
+    <div class="row row-cols-2 row-cols-md-4 g-3 mb-5 bj-fade-in">
+        {% for photo in latest_photos %}
+        <div class="col">
+            <a href="{{ url_for('gallery.list_photos', trip_id=trip.id) }}" class="bj-photo-thumb">
+                <img src="{{ url_for('files.preview_attachment', attachment_id=photo.attachment.id) }}"
+                     alt="{{ photo.caption or 'Memória da viagem' }}">
+                {% if photo.caption %}
+                <div class="bj-photo-overlay">{{ photo.caption }}</div>
+                {% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bj-empty-state mb-5 bj-fade-in">
+        <div class="bj-empty-icon">📸</div>
+        <h5>Nenhuma memória ainda</h5>
+        <p>Adicione fotos para construir o diário colaborativo da viagem.</p>
+        <a href="{{ url_for('gallery.upload_photo', trip_id=trip.id) }}" class="bj-btn-primary">
+            <i class="bi bi-camera"></i> Enviar primeira foto
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- ====== MURAL DE TAREFAS ====== -->
+    <div class="bj-section-header">
+        <div>
+            <div class="bj-section-title">✅ Mural de Logística</div>
+            <div class="bj-section-sub">Organize passagens, hospedagem e tudo mais</div>
+        </div>
+        <a href="{{ url_for('tasks.create_task', trip_id=trip.id) }}" class="bj-btn-primary">
+            <i class="bi bi-plus-lg"></i> Nova Tarefa
+        </a>
+    </div>
+
+    <div class="row g-3 mb-5 bj-fade-in">
+        <!-- Pendente -->
+        <div class="col-md-4">
+            <div class="bj-kanban-col">
+                <div class="bj-kanban-header">
+                    <span class="bj-kanban-dot" style="background:#94a3b8;"></span>
+                    Pendente
+                    <span class="bj-kanban-count">{{ pending_tasks|length }}</span>
+                </div>
+                <div class="bj-kanban-body">
+                    {% for task in pending_tasks %}
+                    {% include "tasks/_task_card.html" %}
+                    {% else %}
+                    <div class="bj-kanban-empty">Nada por aqui.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Em andamento -->
+        <div class="col-md-4">
+            <div class="bj-kanban-col">
+                <div class="bj-kanban-header">
+                    <span class="bj-kanban-dot" style="background:var(--bj-coral);"></span>
+                    Em andamento
+                    <span class="bj-kanban-count">{{ doing_tasks|length }}</span>
+                </div>
+                <div class="bj-kanban-body">
+                    {% for task in doing_tasks %}
+                    {% include "tasks/_task_card.html" %}
+                    {% else %}
+                    <div class="bj-kanban-empty">Nada por aqui.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Concluída -->
+        <div class="col-md-4">
+            <div class="bj-kanban-col">
+                <div class="bj-kanban-header">
+                    <span class="bj-kanban-dot" style="background:#10b981;"></span>
+                    Concluída
+                    <span class="bj-kanban-count">{{ done_tasks|length }}</span>
+                </div>
+                <div class="bj-kanban-body">
+                    {% for task in done_tasks %}
+                    {% include "tasks/_task_card.html" %}
+                    {% else %}
+                    <div class="bj-kanban-empty">Nada por aqui.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MEMBROS ====== -->
+    <div class="bj-section-header mb-3">
+        <div>
+            <div class="bj-section-title">👥 Membros do Grupo</div>
+            <div class="bj-section-sub">{{ trip.members|length }} pessoa(s) nesta viagem</div>
+        </div>
+        {% if can_manage %}
+        <a href="{{ url_for('trips.invite_trip', trip_id=trip.id) }}" class="bj-btn-outline">
+            <i class="bi bi-link-45deg"></i> Convidar
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="row g-3 mb-5 bj-fade-in">
+        {% for member in trip.members %}
+        <div class="col-sm-6 col-lg-4">
+            <div class="bj-member-row">
+                <div class="bj-avatar-lg">{{ member.user.name[0]|upper }}</div>
+                <div class="bj-member-info">
+                    <div class="bj-member-name">{{ member.user.name }}</div>
+                    <div class="bj-member-email">{{ member.user.email }}</div>
+                </div>
+                <div class="ms-auto">
+                    {% if member.role == 'owner' %}
+                    <span class="bj-pill" style="background:#fff3cd; color:#856404;">⭐ Dono</span>
+                    {% elif member.role == 'admin' %}
+                    <span class="bj-pill" style="background:#cff4fc; color:#0c5460;">🛡️ Admin</span>
+                    {% else %}
+                    <span class="bj-pill bj-pill-muted">👤 Membro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<style>
+/* Breadcrumb */
+.bj-back-link {
+    font-size: 0.87rem; font-weight: 500;
+    color: var(--bj-muted); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: var(--bj-transition);
+}
+.bj-back-link:hover { color: var(--bj-coral); }
+
+/* Hero action buttons */
+.bj-btn-hero-action {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.18); color: #fff;
+    border: 1.5px solid rgba(255,255,255,.4);
+    border-radius: 50px; padding: 0.5rem 1.2rem;
+    font-size: 0.87rem; font-weight: 600;
+    text-decoration: none; backdrop-filter: blur(4px);
+    transition: var(--bj-transition);
+}
+.bj-btn-hero-action:hover {
+    background: rgba(255,255,255,.32); color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Section header */
+.bj-section-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 1rem;
+    flex-wrap: wrap; gap: 0.75rem;
+}
+
+/* Photo thumbnails */
+.bj-photo-thumb {
+    display: block; border-radius: var(--bj-radius-sm);
+    overflow: hidden; position: relative;
+    aspect-ratio: 1; text-decoration: none;
+}
+.bj-photo-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; transition: transform 0.3s ease;
+}
+.bj-photo-thumb:hover img { transform: scale(1.07); }
+.bj-photo-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,.7));
+    color: #fff; font-size: 0.77rem; font-weight: 500;
+    padding: 1.5rem 0.65rem 0.5rem;
+    opacity: 0; transition: opacity 0.25s;
+}
+.bj-photo-thumb:hover .bj-photo-overlay { opacity: 1; }
+
+/* Kanban */
+.bj-kanban-col {
+    background: var(--bj-bg);
+    border-radius: var(--bj-radius);
+    overflow: hidden;
+    border: 1px solid var(--bj-border);
+    height: 100%;
+}
+.bj-kanban-header {
+    padding: 1rem 1.2rem 0.75rem;
+    font-weight: 700; font-size: 0.9rem; color: var(--bj-dark);
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bj-white);
+    border-bottom: 1px solid var(--bj-border);
+}
+.bj-kanban-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.bj-kanban-count {
+    margin-left: auto;
+    background: var(--bj-bg); color: var(--bj-muted);
+    border-radius: 50px; padding: 1px 9px;
+    font-size: 0.78rem; font-weight: 600;
+}
+.bj-kanban-body { padding: 0.75rem; }
+.bj-kanban-empty {
+    text-align: center; color: var(--bj-muted);
+    font-size: 0.83rem; padding: 1.5rem 0;
+}
+
+/* Membros */
+.bj-member-row {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--bj-white); border-radius: var(--bj-radius-sm);
+    padding: 1rem 1.2rem; border: 1px solid var(--bj-border);
+    transition: var(--bj-transition);
+}
+.bj-member-row:hover { border-color: var(--bj-coral); }
+.bj-avatar-lg {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--bj-coral-soft); color: var(--bj-coral);
+    font-size: 1.1rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.bj-member-name { font-weight: 700; font-size: 0.9rem; color: var(--bj-dark); }
+.bj-member-email { font-size: 0.77rem; color: var(--bj-muted); }
+</style>
+{% endblock %}

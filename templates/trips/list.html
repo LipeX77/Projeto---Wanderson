@@ -1,0 +1,158 @@
+{% extends "main/base.html" %}
+{% block title %}Minhas Viagens — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header da página -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <p class="bj-section-sub mb-1">Olá, {{ current_user.name.split()[0] }}! 👋</p>
+            <h1 class="bj-section-title" style="font-size:1.9rem;">Minhas Viagens</h1>
+        </div>
+        <a href="{{ url_for('trips.create_trip') }}" class="bj-btn-primary">
+            <i class="bi bi-plus-lg"></i> Nova Viagem
+        </a>
+    </div>
+
+    {% if trips %}
+
+    <!-- Grid de viagens -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 bj-fade-in">
+        {% for trip in trips %}
+        <div class="col">
+            <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}" class="bj-trip-card">
+
+                <!-- Banner com gradiente (varia por índice do loop) -->
+                <div class="bj-trip-card-banner bj-gradient-{{ loop.index0 % 6 }}">
+                    <span style="font-size: 2rem;">
+                        {% set icons = ['🏖️','🏔️','🌆','🗺️','🌴','🌊'] %}
+                        {{ icons[loop.index0 % 6] }}
+                    </span>
+                    <!-- Badge owner -->
+                    {% set member = trip.members | selectattr('user_id', 'equalto', current_user.id) | first %}
+                    {% if member and member.role == 'owner' %}
+                    <span class="bj-trip-role-badge">
+                        <i class="bi bi-star-fill"></i> Dono
+                    </span>
+                    {% else %}
+                    <span class="bj-trip-role-badge bj-role-member">
+                        <i class="bi bi-person-fill"></i> Membro
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Corpo do card -->
+                <div class="bj-trip-card-body">
+                    <div class="bj-trip-card-title">{{ trip.title }}</div>
+                    <div class="bj-trip-card-sub mb-3">
+                        <i class="bi bi-geo-alt me-1" style="color:var(--bj-coral);"></i>{{ trip.destination }}
+                    </div>
+
+                    <!-- Stats rápidas -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="bj-pill bj-pill-muted" style="font-size:0.74rem;">
+                            <i class="bi bi-calendar3"></i>
+                            {{ trip.start_date.strftime('%d/%m') }} – {{ trip.end_date.strftime('%d/%m/%Y') }}
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- Avatars simulados de membros -->
+                        <div class="bj-member-avatars">
+                            {% for m in trip.members[:4] %}
+                            <div class="bj-avatar-mini" title="{{ m.user.name }}">
+                                {{ m.user.name[0].upper() }}
+                            </div>
+                            {% endfor %}
+                            {% if trip.members|length > 4 %}
+                            <div class="bj-avatar-mini bj-avatar-more">+{{ trip.members|length - 4 }}</div>
+                            {% endif %}
+                        </div>
+                        <span class="bj-trip-card-sub">{{ trip.members|length }} membro(s)</span>
+                    </div>
+                </div>
+
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+
+    <!-- Estado vazio -->
+    <div class="bj-empty-state bj-fade-in mt-4">
+        <div class="bj-empty-icon">🧳</div>
+        <h5>Nenhuma viagem ainda</h5>
+        <p>Você ainda não criou nem entrou em nenhuma viagem.<br>Que tal planejar a primeira aventura com seus amigos?</p>
+        <a href="{{ url_for('trips.create_trip') }}" class="bj-btn-primary">
+            <i class="bi bi-plus-lg"></i> Planejar primeira viagem
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<style>
+/* Gradientes variados para os banners dos cards */
+.bj-gradient-0 { background: linear-gradient(135deg, #ff5a4f, #ffb347); }
+.bj-gradient-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+.bj-gradient-2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.bj-gradient-3 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.bj-gradient-4 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.bj-gradient-5 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+.bj-trip-card-banner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+}
+
+.bj-trip-role-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.bj-role-member {
+    background: rgba(0,0,0,0.2);
+}
+
+/* Avatares mini dos membros */
+.bj-member-avatars {
+    display: flex;
+    align-items: center;
+}
+.bj-avatar-mini {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bj-coral-soft);
+    color: var(--bj-coral);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    margin-left: -6px;
+    first-child { margin-left: 0; }
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+}
+.bj-avatar-mini:first-child { margin-left: 0; }
+.bj-avatar-more {
+    background: var(--bj-bg);
+    color: var(--bj-muted);
+    font-size: 0.65rem;
+}
+</style>
+{% endblock %}

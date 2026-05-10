@@ -1,0 +1,78 @@
+{% extends "main/base.html" %}
+{% block title %}Tarefas — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}" class="bj-back-link bj-fade-in">
+        <i class="bi bi-arrow-left"></i> {{ trip.title }}
+    </a>
+
+    <div class="bj-form-area bj-fade-in mt-3">
+        <h1 class="bj-section-title mb-1" style="font-size:1.5rem;">
+            {% if task %}✏️ Editar Tarefa{% else %}➕ Nova Tarefa{% endif %}
+        </h1>
+        <p class="bj-section-sub">{{ trip.title }} · {{ trip.destination }}</p>
+
+        <form method="POST" action="{{ action_url }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Título -->
+            <div class="mb-3">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""),
+                              placeholder="Ex: Comprar passagens aéreas") }}
+                {% for e in form.title.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+
+            <!-- Descrição -->
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""),
+                                    rows="2", placeholder="Detalhes opcionais...") }}
+                {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+
+            <!-- Prioridade, Prazo, Responsável -->
+            <div class="row mb-3">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    {{ form.priority.label(class="form-label") }}
+                    {{ form.priority(class="form-select" + (" is-invalid" if form.priority.errors else "")) }}
+                    {% for e in form.priority.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    {{ form.due_date.label(class="form-label") }}
+                    {{ form.due_date(class="form-control" + (" is-invalid" if form.due_date.errors else ""), type="date") }}
+                    {% for e in form.due_date.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4">
+                    {{ form.assignee_id.label(class="form-label") }}
+                    {{ form.assignee_id(class="form-select" + (" is-invalid" if form.assignee_id.errors else "")) }}
+                    {% for e in form.assignee_id.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                {{ form.submit(class="bj-btn-primary px-4") }}
+                <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}" class="bj-btn-ghost px-4">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.bj-back-link {
+    font-size: 0.87rem; font-weight: 500; color: var(--bj-muted);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    transition: var(--bj-transition);
+}
+.bj-back-link:hover { color: var(--bj-coral); }
+.bj-form-area {
+    background: #fff; border-radius: var(--bj-radius);
+    padding: 2rem; border: 1px solid var(--bj-border);
+    box-shadow: var(--bj-shadow-sm); max-width: 700px;
+}
+</style>
+{% endblock %}

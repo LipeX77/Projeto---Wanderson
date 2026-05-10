@@ -1,0 +1,227 @@
+{% extends "main/base.html" %}
+{% block title %}Convites — {{ trip.title }} — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 760px;">
+
+    <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}" class="bj-back-link bj-fade-in">
+        <i class="bi bi-arrow-left"></i> {{ trip.title }}
+    </a>
+
+    <!-- Hero do painel de convites -->
+    <div class="bj-invite-hero bj-fade-in mt-3">
+        <div class="row align-items-center">
+            <div class="col">
+                <div class="bj-pill mb-2" style="background:rgba(255,255,255,.2); color:#fff; width:fit-content;">
+                    <i class="bi bi-link-45deg"></i> Convites
+                </div>
+                <h1 style="font-size:1.6rem; font-weight:800; color:#fff; margin-bottom:0.25rem;">
+                    Convidar para a Viagem
+                </h1>
+                <p style="color:rgba(255,255,255,.85); font-size:0.9rem; margin:0;">
+                    {{ trip.title }} · {{ trip.destination }}
+                </p>
+            </div>
+            <div class="col-auto mt-3 mt-md-0">
+                <form method="POST" action="{{ url_for('trips.generate_invite', trip_id=trip.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="bj-btn-hero-action">
+                        <i class="bi bi-plus-lg"></i> Gerar Convite
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Como funciona -->
+    <div class="row g-3 my-4 bj-fade-in">
+        <div class="col-md-4">
+            <div class="bj-how-step">
+                <span class="bj-how-num">1</span>
+                <span class="bj-how-txt">Clique em <strong>Gerar Convite</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bj-how-step">
+                <span class="bj-how-num">2</span>
+                <span class="bj-how-txt">Copie o link e envie para o amigo</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bj-how-step">
+                <span class="bj-how-num">3</span>
+                <span class="bj-how-txt">Ele acessa e entra na viagem automaticamente</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de convites -->
+    {% if invites %}
+    <div class="bj-section-title mb-3">Links ativos</div>
+    <div class="d-flex flex-column gap-3 bj-fade-in">
+        {% for invite in invites %}
+        <div class="bj-invite-row">
+            <!-- Ícone -->
+            <div class="bj-invite-icon">
+                <i class="bi bi-link-45deg"></i>
+            </div>
+
+            <!-- Conteúdo -->
+            <div class="bj-invite-info flex-grow-1">
+                <div class="bj-invite-meta">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Criado em {{ invite.created_at.strftime('%d/%m/%Y') }}
+                    &nbsp;·&nbsp;
+                    <i class="bi bi-people me-1"></i>{{ invite.uses }} uso(s)
+                </div>
+
+                <!-- Link + botão copiar -->
+                <div class="bj-invite-link-wrap mt-2">
+                    <input type="text"
+                           class="bj-invite-input"
+                           id="invite-{{ invite.id }}"
+                           value="{{ url_for('trips.join_trip', token=invite.token, _external=True) }}"
+                           readonly>
+                    <button class="bj-copy-btn"
+                            onclick="copyInvite('invite-{{ invite.id }}', this)"
+                            title="Copiar link">
+                        <i class="bi bi-clipboard"></i>
+                        <span>Copiar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Badge status -->
+            <div class="ms-3">
+                <span class="bj-pill" style="background:#edfaf3; color:#18694a; white-space:nowrap;">
+                    <i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> Ativo
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="bj-empty-state bj-fade-in mt-2">
+        <div class="bj-empty-icon">🔗</div>
+        <h5>Nenhum convite gerado</h5>
+        <p>Gere um link de convite e compartilhe com seus amigos para que eles possam entrar na viagem.</p>
+        <form method="POST" action="{{ url_for('trips.generate_invite', trip_id=trip.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="bj-btn-primary">
+                <i class="bi bi-plus-lg"></i> Gerar primeiro convite
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.bj-back-link {
+    font-size: 0.87rem; font-weight: 500; color: var(--bj-muted);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    transition: var(--bj-transition);
+}
+.bj-back-link:hover { color: var(--bj-coral); }
+
+/* Hero do convite */
+.bj-invite-hero {
+    background: linear-gradient(135deg, var(--bj-coral), #ffb347);
+    border-radius: var(--bj-radius-lg);
+    padding: 2rem 2rem;
+    position: relative; overflow: hidden;
+}
+.bj-btn-hero-action {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.18); color: #fff;
+    border: 1.5px solid rgba(255,255,255,.4);
+    border-radius: 50px; padding: 0.6rem 1.4rem;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; backdrop-filter: blur(4px);
+    transition: var(--bj-transition);
+}
+.bj-btn-hero-action:hover {
+    background: rgba(255,255,255,.32); color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Como funciona */
+.bj-how-step {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: #fff; border: 1px solid var(--bj-border);
+    border-radius: var(--bj-radius-sm);
+    padding: 0.85rem 1rem; font-size: 0.87rem;
+}
+.bj-how-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--bj-coral-soft); color: var(--bj-coral);
+    font-weight: 700; font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.bj-how-txt { color: var(--bj-dark); line-height: 1.35; }
+
+/* Invite row */
+.bj-invite-row {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: #fff; border-radius: var(--bj-radius);
+    padding: 1.25rem 1.5rem; border: 1px solid var(--bj-border);
+    transition: var(--bj-transition);
+}
+.bj-invite-row:hover { border-color: var(--bj-coral); box-shadow: var(--bj-shadow-sm); }
+
+.bj-invite-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--bj-coral-soft); color: var(--bj-coral);
+    font-size: 1.2rem; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.bj-invite-meta { font-size: 0.8rem; color: var(--bj-muted); }
+.bj-section-title { font-size: 1.1rem; font-weight: 700; color: var(--bj-dark); }
+
+/* Link wrap */
+.bj-invite-link-wrap {
+    display: flex; align-items: center; gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+.bj-invite-input {
+    flex: 1; background: var(--bj-bg);
+    border: 1.5px solid var(--bj-border);
+    border-radius: 50px; padding: 0.4rem 1rem;
+    font-size: 0.8rem; color: var(--bj-muted);
+    font-family: monospace; min-width: 0;
+    transition: var(--bj-transition);
+}
+.bj-invite-input:focus { outline: none; border-color: var(--bj-coral); }
+
+.bj-copy-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bj-coral); color: #fff;
+    border: none; border-radius: 50px;
+    padding: 0.4rem 1rem; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: var(--bj-transition); white-space: nowrap;
+    flex-shrink: 0;
+}
+.bj-copy-btn:hover { background: var(--bj-coral-dark); }
+.bj-copy-btn.copied {
+    background: #10b981;
+}
+</style>
+
+{% block scripts %}
+<script>
+function copyInvite(inputId, btn) {
+    const input = document.getElementById(inputId);
+    navigator.clipboard.writeText(input.value).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="bi bi-check-lg"></i><span>Copiado!</span>';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = '<i class="bi bi-clipboard"></i><span>Copiar</span>';
+        }, 2500);
+    });
+}
+</script>
+{% endblock %}
+{% endblock %}

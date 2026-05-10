@@ -1,0 +1,178 @@
+{% extends "main/base.html" %}
+{% block title %}Enviar Foto — {{ trip.title }} — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 580px;">
+
+    <a href="{{ url_for('gallery.list_photos', trip_id=trip.id) }}" class="bj-back-link bj-fade-in">
+        <i class="bi bi-arrow-left"></i> Memórias da Viagem
+    </a>
+
+    <div class="bj-upload-card bj-fade-in mt-3">
+
+        <!-- Header -->
+        <div class="bj-upload-header">
+            <div style="font-size:2.5rem; margin-bottom:0.5rem;">📸</div>
+            <h1 class="bj-section-title" style="font-size:1.4rem;">Adicionar Memória</h1>
+            <p class="bj-section-sub" style="margin-bottom:0;">
+                <i class="bi bi-geo-alt me-1" style="color:var(--bj-coral);"></i>{{ trip.title }}
+            </p>
+        </div>
+
+        <div class="bj-upload-body">
+            <form method="POST" enctype="multipart/form-data" id="photoForm">
+                {{ form.hidden_tag() }}
+
+                <!-- Drop zone -->
+                <div class="bj-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                    <div class="bj-dropzone-inner" id="dropzoneInner">
+                        <div class="bj-dz-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                        <div class="bj-dz-label">Clique ou arraste a foto aqui</div>
+                        <div class="bj-dz-hint">JPG, PNG ou WEBP</div>
+                    </div>
+                    <!-- Preview da imagem selecionada -->
+                    <img id="previewImg" src="" alt="preview" style="display:none; width:100%; height:200px; object-fit:cover; border-radius:12px;">
+                </div>
+
+                <!-- Input escondido -->
+                {{ form.file(id="fileInput", style="display:none;",
+                             class=("is-invalid" if form.file.errors else ""),
+                             accept="image/jpeg,image/png,image/webp") }}
+                {% for error in form.file.errors %}
+                <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endfor %}
+
+                <!-- Legenda -->
+                <div class="mt-4 mb-3">
+                    {{ form.caption.label(class="form-label") }}
+                    {{ form.caption(class="form-control" + (" is-invalid" if form.caption.errors else ""),
+                                    placeholder='"Primeiro dia na praia! 🌊"') }}
+                    {% for error in form.caption.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Data -->
+                <div class="mb-4">
+                    {{ form.taken_at.label(class="form-label") }}
+                    {{ form.taken_at(class="form-control" + (" is-invalid" if form.taken_at.errors else ""),
+                                     type="date") }}
+                    {% for error in form.taken_at.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Botões -->
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="bj-btn-primary w-100 justify-content-center py-3", id="submitBtn") }}
+                    <a href="{{ url_for('gallery.list_photos', trip_id=trip.id) }}" class="bj-btn-ghost w-100 justify-content-center">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.bj-back-link {
+    font-size: 0.87rem; font-weight: 500; color: var(--bj-muted);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    transition: var(--bj-transition);
+}
+.bj-back-link:hover { color: var(--bj-coral); }
+
+.bj-upload-card {
+    background: #fff;
+    border-radius: var(--bj-radius-lg);
+    border: 1px solid var(--bj-border);
+    box-shadow: var(--bj-shadow);
+    overflow: hidden;
+}
+.bj-upload-header {
+    background: linear-gradient(135deg, #fff7f3, #ffeae8);
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--bj-border);
+}
+.bj-upload-body { padding: 1.75rem 2rem 2rem; }
+
+/* Drop zone */
+.bj-dropzone {
+    border: 2px dashed var(--bj-coral);
+    border-radius: var(--bj-radius);
+    background: var(--bj-coral-soft);
+    cursor: pointer;
+    transition: var(--bj-transition);
+    overflow: hidden;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.bj-dropzone:hover, .bj-dropzone.drag-over {
+    background: #ffd9d6;
+    border-color: var(--bj-coral-dark);
+    transform: scale(1.01);
+}
+.bj-dropzone-inner {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+.bj-dz-icon {
+    font-size: 2.5rem;
+    color: var(--bj-coral);
+    margin-bottom: 0.5rem;
+}
+.bj-dz-label {
+    font-weight: 600;
+    color: var(--bj-dark);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+.bj-dz-hint {
+    font-size: 0.8rem;
+    color: var(--bj-muted);
+}
+</style>
+
+{% block scripts %}
+<script>
+const fileInput  = document.getElementById('fileInput');
+const dropzone   = document.getElementById('dropzone');
+const inner      = document.getElementById('dropzoneInner');
+const previewImg = document.getElementById('previewImg');
+
+fileInput.addEventListener('change', showPreview);
+
+function showPreview() {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    previewImg.src = url;
+    previewImg.style.display = 'block';
+    inner.style.display = 'none';
+}
+
+// Drag & drop
+dropzone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropzone.classList.add('drag-over');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    showPreview();
+});
+</script>
+{% endblock %}
+{% endblock %}

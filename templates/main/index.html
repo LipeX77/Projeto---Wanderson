@@ -1,0 +1,557 @@
+{% extends "main/base.html" %}
+{% block title %}BoraJunto — Planejamento de Viagens em Grupo{% endblock %}
+
+{% block content %}
+
+<!-- ====== HERO ====== -->
+<section class="bj-home-hero">
+    <div class="container">
+        <div class="row align-items-center min-vh-70">
+            <div class="col-lg-6 bj-fade-in">
+
+                <div class="bj-pill mb-4">
+                    <i class="bi bi-stars"></i> Planejamento colaborativo
+                </div>
+
+                <h1 class="bj-hero-title">
+                    Planeje sua próxima<br>
+                    <span class="bj-hero-highlight">aventura em grupo</span>
+                </h1>
+
+                <p class="bj-hero-sub">
+                    Convide amigos, organize tarefas, centralize documentos e guarde as memórias
+                    da viagem em um só lugar. Privado, simples e bonito.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('trips.list_trips') }}" class="bj-btn-primary bj-btn-lg">
+                        <i class="bi bi-map"></i> Minhas Viagens
+                    </a>
+                    <a href="{{ url_for('trips.create_trip') }}" class="bj-btn-outline bj-btn-lg">
+                        <i class="bi bi-plus-circle"></i> Nova Viagem
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="bj-btn-primary bj-btn-lg">
+                        <i class="bi bi-rocket-takeoff"></i> Começar de graça
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="bj-btn-ghost bj-btn-lg">
+                        Já tenho conta
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mini stats -->
+                <div class="bj-hero-stats mt-5">
+                    <div class="bj-hero-stat">
+                        <span class="bj-hero-stat-n">100%</span>
+                        <span class="bj-hero-stat-l">Privado</span>
+                    </div>
+                    <div class="bj-hero-stat-div"></div>
+                    <div class="bj-hero-stat">
+                        <span class="bj-hero-stat-n">∞</span>
+                        <span class="bj-hero-stat-l">Membros</span>
+                    </div>
+                    <div class="bj-hero-stat-div"></div>
+                    <div class="bj-hero-stat">
+                        <span class="bj-hero-stat-n">0€</span>
+                        <span class="bj-hero-stat-l">Custo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual lado direito -->
+            <div class="col-lg-6 d-none d-lg-flex justify-content-end bj-fade-in">
+                <div class="bj-hero-visual">
+                    <!-- Card mockup flutuante -->
+                    <div class="bj-mock-card bj-mock-main">
+                        <div class="bj-mock-banner">
+                            <span class="bj-mock-emoji">🏖️</span>
+                        </div>
+                        <div class="bj-mock-body">
+                            <div class="bj-mock-title">Guarapari com a galera</div>
+                            <div class="bj-mock-meta">10 Jul – 14 Jul 2026 &nbsp;·&nbsp; 5 membros</div>
+                            <div class="d-flex gap-2 mt-3">
+                                <span class="bj-pill"><i class="bi bi-check2"></i> 3 tarefas</span>
+                                <span class="bj-pill bj-pill-muted"><i class="bi bi-image"></i> 12 fotos</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card menor sobreposto -->
+                    <div class="bj-mock-card bj-mock-float">
+                        <div class="bj-mock-notif">
+                            <span class="bj-mock-notif-icon">📸</span>
+                            <div>
+                                <div class="bj-mock-notif-t">Nova memória!</div>
+                                <div class="bj-mock-notif-s">Carlos adicionou 3 fotos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card tarefa menor -->
+                    <div class="bj-mock-card bj-mock-float2">
+                        <div class="bj-mock-notif">
+                            <span class="bj-mock-notif-icon">✅</span>
+                            <div>
+                                <div class="bj-mock-notif-t">Tarefa concluída</div>
+                                <div class="bj-mock-notif-s">Passagens compradas!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== DESTINOS POPULARES ====== -->
+<section class="bj-destinations py-5 bg-white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <div class="bj-pill bj-pill-muted mb-2">Inspiração</div>
+                <h2 class="bj-section-title" style="font-size:1.8rem;">Destinos Populares</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="bj-btn-ghost bj-swiper-prev" style="width: 44px; height: 44px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%;"><i class="bi bi-chevron-left"></i></button>
+                <button class="bj-btn-ghost bj-swiper-next" style="width: 44px; height: 44px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%;"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <div class="swiper bj-destinations-swiper pb-2">
+            <div class="swiper-wrapper">
+                <!-- 1 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🏖️</div>
+                        <h4 class="bj-dest-title">Rio de Janeiro</h4>
+                        <div class="bj-dest-sub">RJ</div>
+                    </div>
+                </div>
+                <!-- 2 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1588693821035-62df0b61596a?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🍷</div>
+                        <h4 class="bj-dest-title">Gramado</h4>
+                        <div class="bj-dest-sub">RS</div>
+                    </div>
+                </div>
+                <!-- 3 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1590418606746-018840f9cd0f?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🐬</div>
+                        <h4 class="bj-dest-title">Fernando de Noronha</h4>
+                        <div class="bj-dest-sub">PE</div>
+                    </div>
+                </div>
+                <!-- 4 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🥁</div>
+                        <h4 class="bj-dest-title">Salvador</h4>
+                        <div class="bj-dest-sub">BA</div>
+                    </div>
+                </div>
+                <!-- 5 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1533587851505-d119e13bf0eb?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🏄</div>
+                        <h4 class="bj-dest-title">Florianópolis</h4>
+                        <div class="bj-dest-sub">SC</div>
+                    </div>
+                </div>
+                <!-- 6 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1583091917637-268e0d91d8ac?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">⛪</div>
+                        <h4 class="bj-dest-title">Ouro Preto</h4>
+                        <div class="bj-dest-sub">MG</div>
+                    </div>
+                </div>
+                <!-- 7 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1549472911-049e7591c2b5?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🌊</div>
+                        <h4 class="bj-dest-title">Foz do Iguaçu</h4>
+                        <div class="bj-dest-sub">PR</div>
+                    </div>
+                </div>
+                <!-- 8 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🌅</div>
+                        <h4 class="bj-dest-title">Jericoacoara</h4>
+                        <div class="bj-dest-sub">CE</div>
+                    </div>
+                </div>
+                <!-- 9 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1520638515286-5d666d66e771?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🥥</div>
+                        <h4 class="bj-dest-title">Porto Seguro</h4>
+                        <div class="bj-dest-sub">BA</div>
+                    </div>
+                </div>
+                <!-- 10 -->
+                <div class="swiper-slide">
+                    <div class="bj-destination-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%), url('https://images.unsplash.com/photo-1505881503463-71f0088cb3d7?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;">
+                        <div class="bj-dest-emoji">🏝️</div>
+                        <h4 class="bj-dest-title">Maceió</h4>
+                        <div class="bj-dest-sub">AL</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== FEATURES ====== -->
+<section class="bj-features py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="bj-pill bj-pill-muted mb-3">Como funciona</div>
+            <h2 class="bj-section-title" style="font-size:2rem;">Tudo que sua viagem precisa</h2>
+            <p class="bj-section-sub">Em um lugar só, acessível para todos do grupo.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 col-lg-3 bj-fade-in">
+                <div class="bj-feature-card">
+                    <div class="bj-feature-icon">🗺️</div>
+                    <h3 class="bj-feature-title">Crie a viagem</h3>
+                    <p class="bj-feature-desc">Defina destino, datas e convide seus amigos com um link único.</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="col-md-6 col-lg-3 bj-fade-in">
+                <div class="bj-feature-card">
+                    <div class="bj-feature-icon">✅</div>
+                    <h3 class="bj-feature-title">Organize tarefas</h3>
+                    <p class="bj-feature-desc">Distribua responsabilidades: passagens, hospedagem, reservas e mais.</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-md-6 col-lg-3 bj-fade-in">
+                <div class="bj-feature-card">
+                    <div class="bj-feature-icon">📂</div>
+                    <h3 class="bj-feature-title">Centralize docs</h3>
+                    <p class="bj-feature-desc">Guarde comprovantes, reservas e PDFs acessíveis para o grupo.</p>
+                </div>
+            </div>
+            <!-- Feature 4 -->
+            <div class="col-md-6 col-lg-3 bj-fade-in">
+                <div class="bj-feature-card">
+                    <div class="bj-feature-icon">📸</div>
+                    <h3 class="bj-feature-title">Guarde memórias</h3>
+                    <p class="bj-feature-desc">Galeria colaborativa privada para as fotos da viagem do grupo.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== HOW TO ====== -->
+<section class="bj-howto py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5">
+                <div class="bj-pill bj-pill-muted mb-3">Simples assim</div>
+                <h2 class="bj-section-title" style="font-size:1.9rem; line-height:1.25;">
+                    Pronto em minutos.<br>Curtindo em dias.
+                </h2>
+                <p class="bj-section-sub mt-2">
+                    Sem complicação, sem instalação, sem custo. Só você e seus amigos montando a viagem perfeita.
+                </p>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="bj-btn-primary mt-3">
+                    <i class="bi bi-person-plus"></i> Criar minha conta
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-lg-7">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="bj-step-card">
+                            <div class="bj-step-num">01</div>
+                            <div class="bj-step-icon">👤</div>
+                            <div class="bj-step-title">Crie sua conta</div>
+                            <div class="bj-step-desc">Cadastro rápido com nome e e-mail.</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bj-step-card" style="margin-top: 1.5rem;">
+                            <div class="bj-step-num">02</div>
+                            <div class="bj-step-icon">✈️</div>
+                            <div class="bj-step-title">Crie a viagem</div>
+                            <div class="bj-step-desc">Dê um nome e defina as datas.</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bj-step-card" style="margin-top: -0.5rem;">
+                            <div class="bj-step-num">03</div>
+                            <div class="bj-step-icon">🔗</div>
+                            <div class="bj-step-title">Convide amigos</div>
+                            <div class="bj-step-desc">Compartilhe o link de convite.</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bj-step-card">
+                            <div class="bj-step-num">04</div>
+                            <div class="bj-step-icon">🎉</div>
+                            <div class="bj-step-title">Bora junto!</div>
+                            <div class="bj-step-desc">Organize, documente e curta.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== CTA FINAL (apenas para não logados) ====== -->
+{% if not current_user.is_authenticated %}
+<section class="bj-cta-section">
+    <div class="container">
+        <div class="bj-cta-box">
+            <div class="text-center">
+                <div style="font-size:3rem; margin-bottom:1rem;">✈️</div>
+                <h2 style="font-size:2rem; font-weight:800; color:#fff; margin-bottom:0.75rem;">
+                    Pronto para a próxima aventura?
+                </h2>
+                <p style="color:rgba(255,255,255,0.85); font-size:1.05rem; max-width:440px; margin:0 auto 2rem;">
+                    Crie sua conta gratuitamente e comece a planejar agora mesmo.
+                </p>
+                <a href="{{ url_for('auth.register') }}"
+                   style="background:#fff; color:var(--bj-coral); border-radius:50px; padding:0.85rem 2.5rem;
+                          font-weight:700; font-size:1rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+                          box-shadow: 0 4px 20px rgba(0,0,0,.15); transition: all 0.2s;">
+                    <i class="bi bi-rocket-takeoff"></i> Começar de graça
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<!-- CSS local desta página -->
+<style>
+/* Hero */
+.bj-home-hero {
+    padding: 5rem 0 3rem;
+    background: linear-gradient(160deg, #fff7f3 0%, #f6f7f9 60%, #ffeae8 100%);
+}
+.min-vh-70 { min-height: 60vh; }
+.bj-hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    color: var(--bj-dark);
+    line-height: 1.18;
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+}
+.bj-hero-highlight {
+    color: var(--bj-coral);
+    position: relative;
+}
+.bj-hero-sub {
+    font-size: 1.05rem;
+    color: var(--bj-muted);
+    max-width: 460px;
+    line-height: 1.65;
+}
+.bj-btn-lg { padding: 0.8rem 2rem !important; font-size: 1rem !important; }
+
+/* Hero stats */
+.bj-hero-stats {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+.bj-hero-stat { display: flex; flex-direction: column; }
+.bj-hero-stat-n { font-size: 1.4rem; font-weight: 800; color: var(--bj-dark); }
+.bj-hero-stat-l { font-size: 0.78rem; color: var(--bj-muted); font-weight: 500; }
+.bj-hero-stat-div { width: 1px; height: 36px; background: var(--bj-border); }
+
+/* Hero visual mockup */
+.bj-hero-visual {
+    position: relative;
+    width: 360px;
+    height: 400px;
+}
+.bj-mock-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.1);
+    overflow: hidden;
+    position: absolute;
+}
+.bj-mock-main { width: 280px; top: 30px; right: 0; }
+.bj-mock-banner {
+    height: 90px;
+    background: linear-gradient(135deg, var(--bj-coral), #ffb347);
+    display: flex; align-items: center; justify-content: center;
+}
+.bj-mock-emoji { font-size: 2.5rem; }
+.bj-mock-body { padding: 1rem 1.2rem 1.2rem; }
+.bj-mock-title { font-weight: 700; font-size: 0.95rem; color: var(--bj-dark); margin-bottom: 3px; }
+.bj-mock-meta { font-size: 0.77rem; color: var(--bj-muted); }
+
+.bj-mock-float {
+    width: 220px; bottom: 80px; left: 0;
+    animation: floatY 3s ease-in-out infinite alternate;
+}
+.bj-mock-float2 {
+    width: 210px; bottom: 0; right: 30px;
+    animation: floatY 3.5s ease-in-out infinite alternate-reverse;
+}
+.bj-mock-notif { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; }
+.bj-mock-notif-icon { font-size: 1.5rem; }
+.bj-mock-notif-t { font-weight: 700; font-size: 0.82rem; color: var(--bj-dark); }
+.bj-mock-notif-s { font-size: 0.74rem; color: var(--bj-muted); margin-top: 1px; }
+
+@keyframes floatY {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-12px); }
+}
+
+/* Features */
+.bj-features { background: var(--bj-bg); }
+.bj-feature-card {
+    background: #fff;
+    border-radius: var(--bj-radius);
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--bj-border);
+    transition: var(--bj-transition);
+    height: 100%;
+}
+.bj-feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--bj-shadow-lg);
+    border-color: var(--bj-coral);
+}
+.bj-feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.bj-feature-title { font-size: 1rem; font-weight: 700; color: var(--bj-dark); margin-bottom: 0.5rem; }
+.bj-feature-desc  { font-size: 0.87rem; color: var(--bj-muted); line-height: 1.6; margin: 0; }
+
+/* How to */
+.bj-howto { background: #fff; }
+.bj-step-card {
+    background: var(--bj-bg);
+    border-radius: var(--bj-radius);
+    padding: 1.4rem 1.2rem;
+    border: 1px solid var(--bj-border);
+    height: 100%;
+    transition: var(--bj-transition);
+}
+.bj-step-card:hover {
+    background: var(--bj-soft);
+    border-color: var(--bj-coral);
+    transform: translateY(-3px);
+}
+.bj-step-num { font-size: 0.7rem; font-weight: 700; color: var(--bj-coral); letter-spacing: 1px; margin-bottom: 0.5rem; }
+.bj-step-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.bj-step-title { font-weight: 700; font-size: 0.9rem; color: var(--bj-dark); margin-bottom: 0.25rem; }
+.bj-step-desc  { font-size: 0.8rem; color: var(--bj-muted); margin: 0; }
+
+/* CTA final */
+.bj-cta-section { padding: 4rem 0; background: var(--bj-bg); }
+.bj-cta-box {
+    background: linear-gradient(135deg, var(--bj-coral) 0%, #ff8c6b 50%, #ffb347 100%);
+    border-radius: var(--bj-radius-lg);
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+.bj-cta-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(255,255,255,.12) 0%, transparent 70%);
+}
+
+/* Destinos Populares */
+.bj-destination-card {
+    border-radius: var(--bj-radius);
+    padding: 2rem 1.5rem;
+    color: #fff;
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    transition: var(--bj-transition);
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.bj-destination-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+.bj-dest-emoji {
+    font-size: 3rem;
+    margin-bottom: auto;
+}
+.bj-dest-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    line-height: 1.2;
+}
+.bj-dest-sub {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Gradientes para destinos */
+.bj-gradient-0 { background: linear-gradient(135deg, #ff5a4f, #ffb347); }
+.bj-gradient-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+.bj-gradient-2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.bj-gradient-3 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.bj-gradient-4 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.bj-gradient-5 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+</style>
+
+{% block scripts %}
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.bj-destinations-swiper', {
+      slidesPerView: 1.2,
+      spaceBetween: 16,
+      loop: true,
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+      },
+      navigation: {
+        nextEl: '.bj-swiper-next',
+        prevEl: '.bj-swiper-prev',
+      },
+      breakpoints: {
+        576: {
+          slidesPerView: 2.2,
+          spaceBetween: 20,
+        },
+        768: {
+          slidesPerView: 3.2,
+          spaceBetween: 24,
+        },
+        992: {
+          slidesPerView: 4.2,
+          spaceBetween: 24,
+        },
+        1200: {
+          slidesPerView: 5,
+          spaceBetween: 24,
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

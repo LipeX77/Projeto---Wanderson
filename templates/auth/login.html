@@ -1,0 +1,100 @@
+{% extends "main/base.html" %}
+{% block title %}Entrar — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="bj-auth-shell">
+    <div class="bj-auth-card bj-fade-in">
+
+        <!-- Logo topo -->
+        <div class="bj-auth-logo">✈️</div>
+        <h1 class="bj-auth-title">Bem-vindo de volta!</h1>
+        <p class="bj-auth-sub">Entre na sua conta para continuar planejando.</p>
+
+        <form method="POST" action="{{ url_for('auth.login') }}" class="bj-auth-form">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""),
+                              placeholder="seu@email.com") }}
+                {% for error in form.email.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""),
+                                 placeholder="Sua senha") }}
+                {% for error in form.password.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4 form-check">
+                {{ form.remember(class="form-check-input") }}
+                {{ form.remember.label(class="form-check-label text-muted", style="font-size:0.87rem;") }}
+            </div>
+
+            <div class="d-grid">
+                {{ form.submit(class="bj-btn-primary w-100 justify-content-center py-3") }}
+            </div>
+        </form>
+
+        <div class="bj-auth-divider"><span>ou</span></div>
+
+        <div class="text-center">
+            <p class="text-muted mb-0" style="font-size:0.9rem;">
+                Ainda não tem conta?
+                <a href="{{ url_for('auth.register') }}" style="color:var(--bj-coral); font-weight:600;">
+                    Criar conta grátis
+                </a>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.bj-auth-shell {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(160deg, #fff7f3 0%, #f6f7f9 100%);
+}
+.bj-auth-card {
+    background: #fff;
+    border-radius: var(--bj-radius-lg);
+    padding: 2.75rem 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--bj-shadow-lg);
+    border: 1px solid var(--bj-border);
+}
+.bj-auth-logo { font-size: 2.5rem; text-align: center; margin-bottom: 0.75rem; }
+.bj-auth-title {
+    font-size: 1.6rem; font-weight: 800; text-align: center;
+    color: var(--bj-dark); letter-spacing: -0.5px; margin-bottom: 0.35rem;
+}
+.bj-auth-sub {
+    text-align: center; color: var(--bj-muted);
+    font-size: 0.9rem; margin-bottom: 1.75rem;
+}
+.bj-auth-form { margin-top: 0.5rem; }
+.bj-auth-divider {
+    text-align: center; position: relative;
+    margin: 1.5rem 0; color: var(--bj-muted); font-size: 0.85rem;
+}
+.bj-auth-divider::before, .bj-auth-divider::after {
+    content: ''; position: absolute; top: 50%; width: 42%; height: 1px;
+    background: var(--bj-border);
+}
+.bj-auth-divider::before { left: 0; }
+.bj-auth-divider::after  { right: 0; }
+.bj-auth-divider span {
+    background: #fff; padding: 0 0.75rem; position: relative; z-index: 1;
+}
+</style>
+{% endblock %}
