@@ -1,0 +1,130 @@
+{% extends "main/base.html" %}
+{% block title %}Memórias — {{ trip.title }} — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}" class="bj-back-link bj-fade-in">
+        <i class="bi bi-arrow-left"></i> {{ trip.title }}
+    </a>
+
+    <!-- Header -->
+    <div class="bj-section-header mt-3 mb-4 bj-fade-in">
+        <div>
+            <div class="bj-section-title" style="font-size:1.75rem;">📸 Memórias da Viagem</div>
+            <div class="bj-section-sub">{{ trip.destination }} · {{ photos|length }} foto(s)</div>
+        </div>
+        <a href="{{ url_for('gallery.upload_photo', trip_id=trip.id) }}" class="bj-btn-primary">
+            <i class="bi bi-camera"></i> Enviar Foto
+        </a>
+    </div>
+
+    {% if photos %}
+    <!-- Grid de memórias estilo Polarsteps -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 bj-fade-in">
+        {% for photo in photos %}
+        <div class="col">
+            <div class="bj-memory-card">
+
+                <!-- Foto -->
+                <div class="bj-memory-img-wrap">
+                    <img src="{{ url_for('files.preview_attachment', attachment_id=photo.attachment.id) }}"
+                         alt="{{ photo.caption or 'Memória da viagem' }}"
+                         loading="lazy">
+                </div>
+
+                <!-- Corpo -->
+                <div class="bj-memory-body">
+                    {% if photo.caption %}
+                    <div class="bj-memory-caption">"{{ photo.caption }}"</div>
+                    {% endif %}
+
+                    <div class="bj-memory-meta d-flex align-items-center gap-2 mt-2">
+                        <div class="bj-avatar-mini" style="margin-left:0;">
+                            {{ photo.uploaded_by.name[0]|upper }}
+                        </div>
+                        <span>{{ photo.uploaded_by.name.split()[0] }}</span>
+                        <span style="color:var(--bj-border);">·</span>
+                        <span>
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {% if photo.taken_at %}
+                                {{ photo.taken_at.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                {{ photo.created_at.strftime('%d/%m/%Y') }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Ações -->
+                    <div class="bj-memory-actions">
+                        <a href="{{ url_for('files.download_attachment', attachment_id=photo.attachment.id) }}"
+                           class="bj-btn-ghost" style="font-size:0.82rem; padding:0.35rem 0.85rem;">
+                            <i class="bi bi-download"></i> Baixar
+                        </a>
+                        {% if current_user.id == photo.uploaded_by_id or current_user.id == trip.owner_id %}
+                        <form method="POST"
+                              action="{{ url_for('gallery.delete_photo', trip_id=trip.id, photo_id=photo.id) }}"
+                              onsubmit="return confirm('Apagar esta memória permanentemente?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    class="bj-btn-ghost"
+                                    style="font-size:0.82rem; padding:0.35rem 0.85rem; color:#e94b40; border-color:#fecaca;">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Estado vazio -->
+    <div class="bj-empty-state bj-fade-in mt-4">
+        <div class="bj-empty-icon">📸</div>
+        <h5>Nenhuma memória ainda</h5>
+        <p>Seja o primeiro a compartilhar as fotos da viagem com o grupo!</p>
+        <a href="{{ url_for('gallery.upload_photo', trip_id=trip.id) }}" class="bj-btn-primary">
+            <i class="bi bi-camera"></i> Enviar primeira foto
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.bj-back-link {
+    font-size: 0.87rem; font-weight: 500;
+    color: var(--bj-muted); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: var(--bj-transition);
+}
+.bj-back-link:hover { color: var(--bj-coral); }
+.bj-section-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;
+}
+
+.bj-memory-img-wrap {
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    background: var(--bj-bg);
+}
+.bj-memory-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.bj-memory-card:hover .bj-memory-img-wrap img {
+    transform: scale(1.05);
+}
+.bj-memory-actions {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+</style>
+{% endblock %}

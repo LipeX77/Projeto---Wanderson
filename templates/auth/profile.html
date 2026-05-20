@@ -1,0 +1,186 @@
+{% extends "main/base.html" %}
+{% block title %}Meu Perfil — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 680px;">
+
+    <!-- Header do perfil -->
+    <div class="bj-profile-hero bj-fade-in">
+        <div class="bj-profile-avatar">
+            {{ current_user.name[0]|upper }}
+        </div>
+        <div class="bj-profile-info">
+            <h1 class="bj-profile-name">{{ current_user.name }}</h1>
+            <div class="bj-profile-email">
+                <i class="bi bi-envelope me-1"></i>{{ current_user.email }}
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <span class="bj-pill">
+                    <i class="bi bi-circle-fill" style="font-size:0.45rem; color:#10b981;"></i> Conta Ativa
+                </span>
+                <span class="bj-pill bj-pill-muted">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Desde {{ current_user.created_at.strftime('%B de %Y') }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats de viagens -->
+    <div class="row g-3 my-4 bj-fade-in">
+        {% set owned = current_user.owned_trips|length %}
+        {% set member_count = current_user.trip_memberships|length %}
+        <div class="col-6 col-md-4">
+            <div class="bj-stat-card text-center">
+                <div class="bj-stat-number">{{ owned }}</div>
+                <div class="bj-stat-label">Viagem(s) criada(s)</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="bj-stat-card text-center">
+                <div class="bj-stat-number">{{ member_count }}</div>
+                <div class="bj-stat-label">Viagem(s) no total</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="bj-stat-card text-center">
+                <div class="bj-stat-number">{{ member_count - owned }}</div>
+                <div class="bj-stat-label">Como membro</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info da conta -->
+    <div class="bj-profile-section bj-fade-in">
+        <div class="bj-profile-section-title">
+            <i class="bi bi-person-badge me-2" style="color:var(--bj-coral);"></i>Dados da Conta
+        </div>
+        <div class="bj-profile-row">
+            <span class="bj-profile-key">Nome</span>
+            <span class="bj-profile-val">{{ current_user.name }}</span>
+        </div>
+        <div class="bj-profile-row">
+            <span class="bj-profile-key">E-mail</span>
+            <span class="bj-profile-val">{{ current_user.email }}</span>
+        </div>
+        <div class="bj-profile-row">
+            <span class="bj-profile-key">Membro desde</span>
+            <span class="bj-profile-val">{{ current_user.created_at.strftime('%d/%m/%Y') }}</span>
+        </div>
+        <div class="bj-profile-row" style="border-bottom:none;">
+            <span class="bj-profile-key">Status</span>
+            <span class="bj-pill" style="background:#edfaf3; color:#18694a; font-size:0.75rem;">
+                <i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> Ativo
+            </span>
+        </div>
+    </div>
+
+    <!-- Viagens recentes -->
+    {% set memberships = current_user.trip_memberships %}
+    {% if memberships %}
+    <div class="bj-profile-section bj-fade-in">
+        <div class="bj-profile-section-title">
+            <i class="bi bi-map me-2" style="color:var(--bj-coral);"></i>Minhas Viagens
+        </div>
+        {% for m in memberships[:5] %}
+        <a href="{{ url_for('trips.detail_trip', trip_id=m.trip.id) }}" class="bj-profile-trip-row">
+            <div class="bj-profile-trip-icon">
+                {% set icons = ['🏖️','🏔️','🌆','🗺️','🌴'] %}
+                {{ icons[loop.index0 % 5] }}
+            </div>
+            <div class="flex-grow-1">
+                <div class="bj-profile-trip-name">{{ m.trip.title }}</div>
+                <div class="bj-profile-trip-meta">
+                    <i class="bi bi-geo-alt me-1"></i>{{ m.trip.destination }} ·
+                    {{ m.trip.start_date.strftime('%d/%m/%Y') }}
+                </div>
+            </div>
+            <div>
+                {% if m.role == 'owner' %}
+                <span class="bj-pill" style="background:#fff3cd; color:#856404; font-size:0.72rem;">⭐ Dono</span>
+                {% else %}
+                <span class="bj-pill bj-pill-muted" style="font-size:0.72rem;">👤 Membro</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+        {% if memberships|length > 5 %}
+        <div class="text-center mt-3">
+            <a href="{{ url_for('trips.list_trips') }}" style="color:var(--bj-coral); font-weight:600; font-size:0.87rem;">
+                Ver todas as {{ memberships|length }} viagens <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Ação de sair -->
+    <div class="text-center mt-2 bj-fade-in">
+        <a href="{{ url_for('auth.logout') }}" class="bj-btn-ghost" style="color:#e94b40; border-color:#fecaca;">
+            <i class="bi bi-box-arrow-right"></i> Sair da conta
+        </a>
+    </div>
+
+</div>
+
+<style>
+/* Hero do perfil */
+.bj-profile-hero {
+    display: flex; align-items: center; gap: 1.5rem;
+    background: linear-gradient(135deg, #fff7f3, #ffeae8);
+    border-radius: var(--bj-radius-lg); padding: 2rem;
+    border: 1px solid #fde8e6; margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+.bj-profile-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--bj-coral); color: #fff;
+    font-size: 2rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 4px 16px rgba(255,90,79,.35);
+}
+.bj-profile-name {
+    font-size: 1.5rem; font-weight: 800;
+    color: var(--bj-dark); margin-bottom: 0.25rem;
+    letter-spacing: -0.5px;
+}
+.bj-profile-email { font-size: 0.88rem; color: var(--bj-muted); }
+
+/* Seção de perfil */
+.bj-profile-section {
+    background: #fff; border-radius: var(--bj-radius);
+    border: 1px solid var(--bj-border);
+    overflow: hidden; margin-bottom: 1rem;
+}
+.bj-profile-section-title {
+    padding: 1rem 1.25rem 0.75rem;
+    font-weight: 700; font-size: 0.9rem; color: var(--bj-dark);
+    border-bottom: 1px solid var(--bj-border);
+    background: var(--bj-bg);
+}
+.bj-profile-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--bj-border);
+}
+.bj-profile-key { font-size: 0.85rem; color: var(--bj-muted); font-weight: 500; }
+.bj-profile-val { font-size: 0.9rem; color: var(--bj-dark); font-weight: 600; }
+
+/* Viagem row */
+.bj-profile-trip-row {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--bj-border);
+    text-decoration: none; color: inherit; transition: var(--bj-transition);
+}
+.bj-profile-trip-row:hover { background: var(--bj-bg); }
+.bj-profile-trip-row:last-child { border-bottom: none; }
+.bj-profile-trip-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--bj-coral-soft); font-size: 1.3rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.bj-profile-trip-name { font-weight: 700; font-size: 0.88rem; color: var(--bj-dark); margin-bottom: 2px; }
+.bj-profile-trip-meta { font-size: 0.77rem; color: var(--bj-muted); }
+</style>
+{% endblock %}

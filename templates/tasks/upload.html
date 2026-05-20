@@ -1,0 +1,147 @@
+{% extends "main/base.html" %}
+{% block title %}Enviar Comprovante — BoraJunto{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 540px;">
+
+    <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}" class="bj-back-link bj-fade-in">
+        <i class="bi bi-arrow-left"></i> {{ trip.title }}
+    </a>
+
+    <div class="bj-upload-card bj-fade-in mt-3">
+
+        <!-- Header -->
+        <div class="bj-upload-header">
+            <div style="font-size:2.5rem; margin-bottom:0.5rem;">📂</div>
+            <h1 class="bj-section-title" style="font-size:1.4rem;">Enviar Comprovante</h1>
+            <div class="bj-task-ref">
+                <i class="bi bi-check2-square me-1" style="color:var(--bj-coral);"></i>
+                Tarefa: <strong>{{ task.title }}</strong>
+            </div>
+        </div>
+
+        <div class="bj-upload-body">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <!-- Drop zone -->
+                <div class="bj-dropzone bj-dropzone-doc" id="docDropzone"
+                     onclick="document.getElementById('docInput').click()">
+                    <div class="bj-dropzone-inner" id="docInner">
+                        <div class="bj-dz-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+                        <div class="bj-dz-label">Clique ou arraste o arquivo aqui</div>
+                        <div class="bj-dz-hint">PDF, JPG, PNG ou WEBP · máx. 10 MB</div>
+                    </div>
+                    <!-- Feedback de arquivo selecionado -->
+                    <div id="fileSelected" style="display:none; padding:1.5rem; text-align:center;">
+                        <div style="font-size:2rem; margin-bottom:0.5rem; color:var(--bj-coral);">
+                            <i class="bi bi-file-earmark-check-fill"></i>
+                        </div>
+                        <div id="fileName" style="font-weight:600; font-size:0.9rem; color:var(--bj-dark);"></div>
+                        <div id="fileSize" style="font-size:0.78rem; color:var(--bj-muted); margin-top:3px;"></div>
+                    </div>
+                </div>
+
+                {{ form.file(id="docInput", style="display:none;",
+                             class=("is-invalid" if form.file.errors else "")) }}
+                {% for error in form.file.errors %}
+                <div class="text-danger small mt-2 d-flex align-items-center gap-1">
+                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endfor %}
+
+                <!-- Botões -->
+                <div class="d-grid gap-2 mt-4">
+                    {{ form.submit(class="bj-btn-primary w-100 justify-content-center py-3") }}
+                    <a href="{{ url_for('trips.detail_trip', trip_id=trip.id) }}"
+                       class="bj-btn-ghost w-100 justify-content-center">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.bj-back-link {
+    font-size: 0.87rem; font-weight: 500; color: var(--bj-muted);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    transition: var(--bj-transition);
+}
+.bj-back-link:hover { color: var(--bj-coral); }
+
+.bj-upload-card {
+    background: #fff; border-radius: var(--bj-radius-lg);
+    border: 1px solid var(--bj-border); box-shadow: var(--bj-shadow); overflow: hidden;
+}
+.bj-upload-header {
+    background: linear-gradient(135deg, #f0f7ff, #e8f4ff);
+    padding: 2rem 2rem 1.5rem; text-align: center;
+    border-bottom: 1px solid var(--bj-border);
+}
+.bj-task-ref {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #fff; border-radius: 50px; padding: 0.35rem 1rem;
+    font-size: 0.85rem; color: var(--bj-dark);
+    border: 1px solid var(--bj-border); margin-top: 0.75rem;
+}
+.bj-upload-body { padding: 1.75rem 2rem 2rem; }
+
+.bj-dropzone {
+    border: 2px dashed var(--bj-border);
+    border-radius: var(--bj-radius);
+    background: var(--bj-bg);
+    cursor: pointer; transition: var(--bj-transition);
+    min-height: 160px; display: flex;
+    align-items: center; justify-content: center;
+}
+.bj-dropzone:hover, .bj-dropzone.drag-over {
+    border-color: var(--bj-coral);
+    background: var(--bj-coral-soft);
+    transform: scale(1.01);
+}
+.bj-dropzone-inner { text-align: center; padding: 2rem 1rem; }
+.bj-dz-icon { font-size: 2.5rem; color: var(--bj-muted); margin-bottom: 0.5rem; }
+.bj-dropzone:hover .bj-dz-icon, .bj-dropzone.drag-over .bj-dz-icon {
+    color: var(--bj-coral);
+}
+.bj-dz-label { font-weight: 600; color: var(--bj-dark); font-size: 0.95rem; margin-bottom: 0.25rem; }
+.bj-dz-hint  { font-size: 0.8rem; color: var(--bj-muted); }
+</style>
+
+{% block scripts %}
+<script>
+const docInput  = document.getElementById('docInput');
+const docDrop   = document.getElementById('docDropzone');
+const docInner  = document.getElementById('docInner');
+const fileSelEl = document.getElementById('fileSelected');
+const fileNameEl = document.getElementById('fileName');
+const fileSizeEl = document.getElementById('fileSize');
+
+docInput.addEventListener('change', handleFile);
+
+function handleFile() {
+    const file = docInput.files[0];
+    if (!file) return;
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = (file.size / 1024).toFixed(0) + ' KB';
+    docInner.style.display   = 'none';
+    fileSelEl.style.display  = 'block';
+    docDrop.style.borderColor = 'var(--bj-coral)';
+    docDrop.style.background  = 'var(--bj-coral-soft)';
+}
+
+docDrop.addEventListener('dragover',  e => { e.preventDefault(); docDrop.classList.add('drag-over'); });
+docDrop.addEventListener('dragleave', ()  => docDrop.classList.remove('drag-over'));
+docDrop.addEventListener('drop', e => {
+    e.preventDefault(); docDrop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const dt = new DataTransfer(); dt.items.add(file);
+    docInput.files = dt.files;
+    handleFile();
+});
+</script>
+{% endblock %}
+{% endblock %}
